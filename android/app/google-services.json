@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "735672419145",
+    "project_id": "desafiotecnico-app",
+    "storage_bucket": "desafiotecnico-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735672419145:android:0dbfb43b51a97ebb151098",
+        "android_client_info": {
+          "package_name": "com.example.desafio_tecnico"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "735672419145-shlts67kqmj1eekia3jg1jui4j5fcc90.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.desafio_tecnico",
+            "certificate_hash": "151996a4d3649c2687e77c86d566b9caddc37ad3"
+          }
+        },
+        {
+          "client_id": "735672419145-j3h4g1aq9ra7tc1dsjghiqt65qqccp9v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3xzJo-8JT_JcKVfAEJtpY8-9Zp9i6jRk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "735672419145-j3h4g1aq9ra7tc1dsjghiqt65qqccp9v.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "735672419145-g8uotbt321naes2hiitm52jme9qcp6pd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.desafioTecnico"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

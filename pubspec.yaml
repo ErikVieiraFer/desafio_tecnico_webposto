@@ -1,0 +1,48 @@
+name: desafio_tecnico
+description: "A new Flutter project."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.3.1
+
+  # Firebase - Versões atualizadas e compatíveis
+  firebase_core: ^3.3.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.1.0
+  google_sign_in: ^6.2.1
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  hooks_riverpod: ^2.6.1
+  mobx: ^2.5.0
+  flutter_mobx: ^2.3.0
+
+  # Outros
+  dio: ^5.9.0
+  intl: ^0.20.2
+  webview_flutter: ^4.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+  build_runner: ^2.5.4
+  custom_lint: ^0.7.6
+  riverpod_generator: ^2.6.5
+  riverpod_lint: ^2.6.5
+  mocktail: ^1.0.4
+  mobx_codegen: ^2.7.1
+
+flutter:
+  uses-material-design: true
