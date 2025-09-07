@@ -76,13 +76,13 @@ class AppTheme {
     ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: fontColor,
-      selectionColor: fontColor.withOpacity(0.3),
+      selectionColor: fontColor.withAlpha(77),
       selectionHandleColor: accentColor,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: fontColor.withOpacity(0.05),
-      hintStyle: GoogleFonts.poppins(color: fontColor.withOpacity(0.7)),
+      fillColor: fontColor.withAlpha(13),
+      hintStyle: GoogleFonts.poppins(color: fontColor.withAlpha(179)),
       labelStyle: GoogleFonts.poppins(color: fontColor),
 
       enabledBorder: OutlineInputBorder(
@@ -182,13 +182,13 @@ class AppTheme {
     ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: primaryColor,
-      selectionColor: primaryColor.withOpacity(0.3),
+      selectionColor: primaryColor.withAlpha(77),
       selectionHandleColor: accentColor,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: primaryColor.withOpacity(0.05),
-      hintStyle: GoogleFonts.poppins(color: primaryColor.withOpacity(0.7)),
+      fillColor: primaryColor.withAlpha(13),
+      hintStyle: GoogleFonts.poppins(color: primaryColor.withAlpha(179)),
       labelStyle: GoogleFonts.poppins(color: primaryColor),
 
       enabledBorder: OutlineInputBorder(

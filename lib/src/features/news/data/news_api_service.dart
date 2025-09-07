@@ -3,7 +3,7 @@ import 'package:desafio_tecnico/src/features/news/domain/models/article.dart';
 
 class NewsApiService {
   final Dio _dio;
-  final String _apiKey = '2d93ba35d5b6b4a4a4c481d5ef0e5d51'; // Sua chave da GNews API
+  final String _apiKey = '2d93ba35d5b6b4a4a4c481d5ef0e5d51';
   final String _baseUrl = 'https://gnews.io/api/v4';
 
   NewsApiService(this._dio);
@@ -14,8 +14,8 @@ class NewsApiService {
         '$_baseUrl/top-headlines',
         queryParameters: {
           'country': country,
-          'lang': 'pt', // Usando 'lang' para GNews API
-          'token': _apiKey, // Usando 'token' para GNews API
+          'lang': 'pt',
+          'token': _apiKey,
         },
       );
 
