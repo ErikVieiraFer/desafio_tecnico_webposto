@@ -5,8 +5,6 @@ import 'package:desafio_tecnico/src/features/news/data/news_api_service.dart';
 import 'package:dio/dio.dart';
 import 'package:desafio_tecnico/src/features/news/presentation/screens/news_detail_screen.dart';
 
-// Instanciando o NewsApiService e o NewsStore globalmente por enquanto.
-// Em uma aplicação maior, usaríamos um sistema de injeção de dependências.
 final newsApiService = NewsApiService(Dio());
 final newsStore = NewsStore(newsApiService);
 
@@ -21,7 +19,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
   @override
   void initState() {
     super.initState();
-    newsStore.fetchTopHeadlines(country: 'br'); // Buscar notícias do Brasil
+    newsStore.fetchTopHeadlines(country: 'br');
   }
 
   @override
@@ -45,7 +43,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
         return Card(
           margin: const EdgeInsets.all(8.0),
           child: SizedBox(
-            height: 240, // Altura fixa para o carrossel de notícias
+            height: 240,
             child: PageView.builder(
               itemCount: newsStore.articles.length,
               itemBuilder: (context, index) {
@@ -55,7 +53,8 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (article.urlToImage != null && article.urlToImage!.isNotEmpty)
+                      if (article.urlToImage != null &&
+                          article.urlToImage!.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: Image.network(
@@ -64,7 +63,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                             width: double.infinity,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return const SizedBox.shrink(); // Hide if image fails to load
+                              return const SizedBox.shrink();
                             },
                           ),
                         ),
@@ -85,18 +84,17 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                       const Spacer(),
                       TextButton(
                         onPressed: () {
-                          if (article.url != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => NewsDetailScreen(url: article.url!),
-                              ),
-                            );
-                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  NewsDetailScreen(url: article.url),
+                            ),
+                          );
                         },
                         child: Text(
                           'Ler mais',
-                          style: TextStyle(color: theme.colorScheme.secondary), // Set text color to secondary color
+                          style: TextStyle(color: theme.colorScheme.secondary),
                         ),
                       ),
                     ],
