@@ -9,6 +9,22 @@ part of 'task_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$TaskStore on _TaskStoreBase, Store {
+  Computed<List<Task>>? _$filteredTasksComputed;
+
+  @override
+  List<Task> get filteredTasks =>
+      (_$filteredTasksComputed ??= Computed<List<Task>>(
+        () => super.filteredTasks,
+        name: '_TaskStoreBase.filteredTasks',
+      )).value;
+  Computed<List<String>>? _$allTagsComputed;
+
+  @override
+  List<String> get allTags => (_$allTagsComputed ??= Computed<List<String>>(
+    () => super.allTags,
+    name: '_TaskStoreBase.allTags',
+  )).value;
+
   late final _$tasksAtom = Atom(name: '_TaskStoreBase.tasks', context: context);
 
   @override
@@ -54,6 +70,24 @@ mixin _$TaskStore on _TaskStoreBase, Store {
   set error(String? value) {
     _$errorAtom.reportWrite(value, super.error, () {
       super.error = value;
+    });
+  }
+
+  late final _$selectedTagAtom = Atom(
+    name: '_TaskStoreBase.selectedTag',
+    context: context,
+  );
+
+  @override
+  String? get selectedTag {
+    _$selectedTagAtom.reportRead();
+    return super.selectedTag;
+  }
+
+  @override
+  set selectedTag(String? value) {
+    _$selectedTagAtom.reportWrite(value, super.selectedTag, () {
+      super.selectedTag = value;
     });
   }
 
@@ -103,6 +137,18 @@ mixin _$TaskStore on _TaskStoreBase, Store {
   );
 
   @override
+  void setTagFilter(String? tag) {
+    final _$actionInfo = _$_TaskStoreBaseActionController.startAction(
+      name: '_TaskStoreBase.setTagFilter',
+    );
+    try {
+      return super.setTagFilter(tag);
+    } finally {
+      _$_TaskStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void dispose() {
     final _$actionInfo = _$_TaskStoreBaseActionController.startAction(
       name: '_TaskStoreBase.dispose',
@@ -119,7 +165,10 @@ mixin _$TaskStore on _TaskStoreBase, Store {
     return '''
 tasks: ${tasks},
 isLoading: ${isLoading},
-error: ${error}
+error: ${error},
+selectedTag: ${selectedTag},
+filteredTasks: ${filteredTasks},
+allTags: ${allTags}
     ''';
   }
 }

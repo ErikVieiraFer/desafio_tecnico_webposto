@@ -1,16 +1,12 @@
-import 'package:desafio_tecnico/src/repositories/task_repository.dart';
-import 'package:desafio_tecnico/src/features/auth/presentation/widgets/auth_widget.dart';
-import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:desafio_tecnico/src/features/tasks/data/tag_repository.dart';
+import 'package:desafio_tecnico/src/features/tasks/data/task_repository.dart';
+import 'package:desafio_tecnico/src/features/tasks/presentation/stores/tag_store.dart';
+import 'package:desafio_tecnico/src/features/tasks/presentation/stores/task_store.dart';
 
-final taskRepositoryProvider = Provider<TaskRepository>((ref) {
-  return TaskRepository();
-});
+// Repositories
+final tagRepository = TagRepository();
+final taskRepository = TaskRepository();
 
-final tasksProvider = StreamProvider.autoDispose<List<Task>>((ref) {
-  final user = ref.watch(authStateChangesProvider).asData?.value;
-  if (user != null) {
-    return ref.watch(taskRepositoryProvider).getTasks(user.uid);
-  }
-  return Stream.value([]);
-});
+// Stores
+final tagStore = TagStore(tagRepository);
+final taskStore = TaskStore(taskRepository, tagStore);

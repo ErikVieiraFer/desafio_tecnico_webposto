@@ -1,7 +1,10 @@
-import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
 import 'package:desafio_tecnico/src/features/tasks/data/task_repository.dart';
+import 'package:desafio_tecnico/src/features/tasks/domain/tag.dart';
+import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
+import 'package:desafio_tecnico/src/features/tasks/presentation/stores/tag_store.dart';
 import 'package:mobx/mobx.dart';
-import 'dart:async'; // Importar para StreamSubscription
+import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 
 part 'task_store.g.dart';
 
@@ -9,9 +12,10 @@ class TaskStore = _TaskStoreBase with _$TaskStore;
 
 abstract class _TaskStoreBase with Store {
   final TaskRepository _taskRepository;
+  final TagStore _tagStore;
   StreamSubscription<List<Task>>? _tasksSubscription;
 
-  _TaskStoreBase(this._taskRepository);
+  _TaskStoreBase(this._taskRepository, this._tagStore);
 
   @observable
   ObservableList<Task> tasks = ObservableList<Task>();
@@ -22,33 +26,71 @@ abstract class _TaskStoreBase with Store {
   @observable
   String? error;
 
+  @observable
+  String? selectedTag;
+
+  @computed
+  List<Task> get filteredTasks {
+    if (selectedTag == null || selectedTag!.isEmpty) {
+      return tasks;
+    }
+    return tasks
+        .where((task) => task.tags.any((tag) => tag.name == selectedTag))
+        .toList();
+  }
+
+  @computed
+  List<String> get allTags {
+    final tags = <String>{};
+    for (var task in tasks) {
+      tags.addAll(task.tags.map((t) => t.name));
+    }
+    return tags.toList()..sort();
+  }
+
+  @action
+  void setTagFilter(String? tag) {
+    selectedTag = tag;
+  }
+
   @action
   Future<void> fetchTasks(String userId) async {
     isLoading = true;
     error = null;
-    _tasksSubscription?.cancel(); // Cancela a inscrição anterior, se houver
+    _tasksSubscription?.cancel();
 
-    try {
-      _tasksSubscription = _taskRepository.getTasks(userId).listen(
-        (taskList) {
-          runInAction(() {
-            tasks = ObservableList.of(taskList);
-            isLoading = false;
-          });
-        },
-        onError: (e) {
-          runInAction(() {
-            error = e.toString();
-            isLoading = false;
-          });
-        },
-      );
-    } catch (e) {
-      runInAction(() {
-        error = e.toString();
-        isLoading = false;
-      });
-    }
+    final tasksStream = _taskRepository.getTasks(userId);
+    final tagsStream = _tagStore.tagsStream(userId);
+
+    _tasksSubscription = Rx.combineLatest2(
+      tasksStream,
+      tagsStream,
+      (List<Task> taskList, List<Tag> tagList) {
+        // Cria um mapa de tags para busca rápida
+        final tagMap = {for (var tag in tagList) tag.id: tag};
+
+        for (var task in taskList) {
+          task.tags = task.tagIds
+              .map((tagId) => tagMap[tagId]) // Busca a tag no mapa
+              .whereType<Tag>() // Filtra os nulos de forma segura
+              .toList();
+        }
+        return taskList;
+      },
+    ).listen(
+      (populatedTasks) {
+        runInAction(() {
+          tasks = ObservableList.of(populatedTasks);
+          isLoading = false;
+        });
+      },
+      onError: (e) {
+        runInAction(() {
+          error = e.toString();
+          isLoading = false;
+        });
+      },
+    );
   }
 
   @action
@@ -78,7 +120,6 @@ abstract class _TaskStoreBase with Store {
     }
   }
 
-  // M_étodo para limpar a inscrição quando a store n_ão for mais necess_ária
   @action
   void dispose() {
     _tasksSubscription?.cancel();
