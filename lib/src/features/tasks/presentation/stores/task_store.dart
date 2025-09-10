@@ -1,7 +1,8 @@
-import 'package:desafio_tecnico/src/features/tasks/data/task_repository.dart';
+
 import 'package:desafio_tecnico/src/features/tasks/domain/tag.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/stores/tag_store.dart';
+import 'package:desafio_tecnico/src/repositories/task_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'dart:async';

@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:desafio_tecnico/main.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/tag.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
+import 'package:desafio_tecnico/src/features/tasks/presentation/stores/comment_store.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/widgets/tag_selection_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 
 class EditTaskScreen extends StatefulWidget {
@@ -18,6 +20,8 @@ class EditTaskScreen extends StatefulWidget {
 class _EditTaskScreenState extends State<EditTaskScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
+  late final TextEditingController _commentController;
+  late final CommentStore _commentStore;
   final List<Tag> _selectedTags = [];
   DateTimeRange? _selectedDateRange;
 
@@ -26,6 +30,10 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.task.title);
     _descriptionController = TextEditingController(text: widget.task.description);
+    _commentController = TextEditingController();
+    _commentStore = CommentStore(taskRepository, authStore);
+    _commentStore.setupCommentsStream(widget.task.id!);
+
     _selectedTags.addAll(widget.task.tags);
 
     if (widget.task.startDate != null && widget.task.endDate != null) {
@@ -34,6 +42,15 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         end: widget.task.endDate!.toDate(),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _commentController.dispose();
+    _commentStore.dispose();
+    super.dispose();
   }
 
   void _saveTask() {
@@ -58,6 +75,14 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     );
     taskStore.updateTask(authStore.user!.uid, updatedTask);
     Navigator.of(context).pop();
+  }
+
+  void _addComment() {
+    if (_commentController.text.isNotEmpty) {
+      _commentStore.addComment(_commentController.text);
+      _commentController.clear();
+      FocusScope.of(context).unfocus();
+    }
   }
 
   void _showTagSelectionDialog() {
@@ -156,9 +181,64 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               onPressed: _saveTask,
               child: const Text('Salvar Alterações'),
             ),
+            const SizedBox(height: 24.0),
+            const Divider(),
+            const SizedBox(height: 16.0),
+            Text('Comentários', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 16.0),
+            _buildCommentSection(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCommentSection() {
+    return Column(
+      children: [
+        Observer(
+          builder: (_) {
+            if (_commentStore.comments.isEmpty) {
+              return const Center(child: Text('Nenhum comentário ainda.'));
+            }
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _commentStore.comments.length,
+              itemBuilder: (context, index) {
+                final comment = _commentStore.comments[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: ListTile(
+                    title: Text(comment.authorName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(comment.content),
+                    trailing: Text(
+                      DateFormat('dd/MM/yy HH:mm').format(comment.timestamp.toDate()),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 16.0),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _commentController,
+                decoration: const InputDecoration(labelText: 'Adicionar um comentário...'),
+                onFieldSubmitted: (_) => _addComment(),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.send),
+              onPressed: _addComment,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -4,13 +4,13 @@ import 'package:desafio_tecnico/src/features/tasks/presentation/screens/home_scr
 import 'package:desafio_tecnico/src/features/auth/presentation/screens/login_screen.dart';
 import 'package:desafio_tecnico/src/repositories/auth_repository.dart';
 import 'package:desafio_tecnico/src/features/auth/presentation/stores/auth_store.dart';
+import 'package:desafio_tecnico/src/repositories/task_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:desafio_tecnico/src/core/ui/theme/theme_store.dart';
 import 'package:desafio_tecnico/src/repositories/kanban_list_repository.dart';
 import 'package:desafio_tecnico/src/features/kanban/presentation/stores/kanban_store.dart';
-import 'package:desafio_tecnico/src/features/tasks/data/task_repository.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/stores/tag_store.dart';
 import 'package:desafio_tecnico/src/features/tasks/data/tag_repository.dart'; // New import
 import 'package:desafio_tecnico/src/features/tasks/presentation/stores/task_store.dart';
