@@ -5,14 +5,12 @@ class KanbanList {
   String name;
   int order;
   String userId;
-  List<String> taskIds;
 
   KanbanList({
     required this.id,
     required this.name,
     required this.order,
     required this.userId,
-    this.taskIds = const [],
   });
 
   // Add copyWith method
@@ -21,14 +19,12 @@ class KanbanList {
     String? name,
     int? order,
     String? userId,
-    List<String>? taskIds,
   }) {
     return KanbanList(
       id: id ?? this.id,
       name: name ?? this.name,
       order: order ?? this.order,
       userId: userId ?? this.userId,
-      taskIds: taskIds ?? this.taskIds,
     );
   }
 
@@ -38,7 +34,6 @@ class KanbanList {
       name: map['name'] ?? '',
       order: map['order'] ?? 0,
       userId: map['userId'] ?? '',
-      taskIds: List<String>.from(map['taskIds'] ?? []),
     );
   }
 
@@ -49,7 +44,6 @@ class KanbanList {
       name: data['name'] ?? '',
       order: data['order'] ?? 0,
       userId: data['userId'] ?? '',
-      taskIds: List<String>.from(data['taskIds'] ?? []),
     );
   }
 
@@ -58,7 +52,6 @@ class KanbanList {
       'name': name,
       'order': order,
       'userId': userId,
-      'taskIds': taskIds,
     };
   }
 }

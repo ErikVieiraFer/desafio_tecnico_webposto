@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:desafio_tecnico/main.dart';
-import 'package:desafio_tecnico/src/core/ui/theme/app_theme.dart';
 import 'package:desafio_tecnico/src/features/kanban/presentation/widgets/kanban_column_widget.dart';
 import 'package:desafio_tecnico/src/features/kanban/presentation/widgets/add_column_dialog.dart';
 
@@ -10,7 +9,6 @@ class KanbanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure tasks are fetched when KanbanScreen is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (authStore.user != null) {
         taskStore.fetchTasks(authStore.user!.uid);
@@ -28,6 +26,20 @@ class KanbanScreen extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Quadro Kanban'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Adicionar Coluna',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AddColumnDialog(isDarkMode: isDarkMode);
+                    },
+                  );
+                },
+              ),
+            ],
           ),
           body: kanbanStore.isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -42,18 +54,6 @@ class KanbanScreen extends StatelessWidget {
                         }).toList(),
                       ),
                     ),
-          floatingActionButton: FloatingActionButton(
-            backgroundColor: AppTheme.accentColor,
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AddColumnDialog(isDarkMode: isDarkMode);
-                },
-              );
-            },
-            child: Icon(Icons.add, color: AppTheme.primaryColor),
-          ),
         );
       },
     );

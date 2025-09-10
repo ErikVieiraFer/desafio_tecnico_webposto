@@ -77,6 +77,16 @@ mixin _$TagStore on _TagStoreBase, Store {
     return _$addTagAsyncAction.run(() => super.addTag(userId, tag));
   }
 
+  late final _$deleteTagAsyncAction = AsyncAction(
+    '_TagStoreBase.deleteTag',
+    context: context,
+  );
+
+  @override
+  Future<void> deleteTag(String userId, String tagId) {
+    return _$deleteTagAsyncAction.run(() => super.deleteTag(userId, tagId));
+  }
+
   late final _$_TagStoreBaseActionController = ActionController(
     name: '_TagStoreBase',
     context: context,

@@ -212,7 +212,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 if (taskStore.filteredTasks.isEmpty) {
                   return const Center(
-                    child: Text('Nenhuma tarefa encontrada para os filtros selecionados.'),
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'Nenhuma tarefa encontrada para os filtros selecionados.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
                   );
                 }
 

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:desafio_tecnico/main.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/screens/add_task_screen.dart';
 import 'package:flutter/material.dart';
@@ -174,11 +175,14 @@ class KanbanColumnWidget extends StatelessWidget {
                       final newListId = kanbanList.id;
 
                       if (oldListId != newListId) {
-                        final taskToUpdate = taskStore.tasks.firstWhere((task) => task.id == taskId);
-                        final updatedTask = taskToUpdate.copyWith(kanbanListId: newListId);
-                        await taskStore.updateTask(authStore.user!.uid, updatedTask);
-
-                        kanbanStore.moveTaskBetweenKanbanLists(taskId, oldListId, newListId);
+                        final taskToUpdate = taskStore.tasks
+                            .firstWhere((task) => task.id == taskId);
+                        final updatedTask = taskToUpdate.copyWith(
+                          kanbanListId: newListId,
+                          updatedAt: Timestamp.now(),
+                        );
+                        await taskStore.updateTask(
+                            authStore.user!.uid, updatedTask);
                       }
                     },
                     builder: (context, candidateData, rejectedData) {

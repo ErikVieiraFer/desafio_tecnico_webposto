@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:mobx/mobx.dart';
 import 'package:desafio_tecnico/src/features/kanban/data/models/kanban_list.dart';
 import 'package:desafio_tecnico/src/repositories/kanban_list_repository.dart';
-import 'package:desafio_tecnico/src/repositories/auth_repository.dart'; // Assuming AuthRepository exists
+import 'package:desafio_tecnico/src/repositories/auth_repository.dart';
 
 part 'kanban_store.g.dart';
 
@@ -9,7 +10,10 @@ class KanbanStore = _KanbanStore with _$KanbanStore;
 
 abstract class _KanbanStore with Store {
   final KanbanListRepository _kanbanListRepository;
-  final AuthRepository _authRepository; // Assuming AuthRepository exists
+  final AuthRepository _authRepository;
+
+  StreamSubscription<List<KanbanList>>? _kanbanListsSubscription;
+  Completer<void>? _listsLoadedCompleter;
 
   _KanbanStore(this._kanbanListRepository, this._authRepository);
 
@@ -20,30 +24,51 @@ abstract class _KanbanStore with Store {
   bool isLoading = false;
 
   @action
-  Future<void> loadKanbanLists() async {
+  Future<void> loadKanbanLists() {
+    if (_listsLoadedCompleter != null && !_listsLoadedCompleter!.isCompleted) {
+      return _listsLoadedCompleter!.future;
+    }
+    _listsLoadedCompleter = Completer<void>();
+
     final userId = _authRepository.currentUser?.uid;
-    if (userId == null) return;
-
-    isLoading = true;
-
-    var lists = await _kanbanListRepository.getKanbanLists(userId).first;
-
-    if (!lists.any((list) => list.name == 'A Fazer')) {
-      await _createDefaultKanbanList(userId);
-      // After creating, we need to get the updated list
-      lists = await _kanbanListRepository.getKanbanLists(userId).first;
+    if (userId == null) {
+      isLoading = false;
+      _listsLoadedCompleter!.complete();
+      return _listsLoadedCompleter!.future;
     }
 
-    runInAction(() {
-      kanbanLists = ObservableList.of(lists);
-      isLoading = false;
+    isLoading = true;
+    _kanbanListsSubscription?.cancel();
+    _kanbanListsSubscription =
+        _kanbanListRepository.getKanbanLists(userId).listen((lists) {
+      runInAction(() {
+        if (lists.isEmpty && kanbanLists.isEmpty) {
+          _createDefaultKanbanList(userId);
+        }
+        kanbanLists = ObservableList.of(lists);
+        isLoading = false;
+
+        if (!_listsLoadedCompleter!.isCompleted) {
+          _listsLoadedCompleter!.complete();
+        }
+      });
+    }, onError: (error) {
+      print("Erro ao carregar listas Kanban: $error");
+      runInAction(() {
+        isLoading = false;
+        if (!_listsLoadedCompleter!.isCompleted) {
+          _listsLoadedCompleter!.completeError(error);
+        }
+      });
     });
+
+    return _listsLoadedCompleter!.future;
   }
 
   @action
   Future<void> _createDefaultKanbanList(String userId) async {
     final defaultList = KanbanList(
-      id: '', // Firestore will generate ID
+      id: '', 
       name: 'A Fazer',
       order: 0,
       userId: userId,
@@ -56,7 +81,8 @@ abstract class _KanbanStore with Store {
     final userId = _authRepository.currentUser?.uid;
     if (userId == null) return;
 
-    final newOrder = kanbanLists.isEmpty ? 0 : kanbanLists.last.order + 1;
+    final newOrder =
+        kanbanLists.isEmpty ? 0 : kanbanLists.map((l) => l.order).reduce((a, b) => a > b ? a : b) + 1;
     final newList = KanbanList(
       id: '',
       name: name,
@@ -73,7 +99,12 @@ abstract class _KanbanStore with Store {
 
   @action
   Future<void> deleteKanbanList(String listId) async {
-    await _kanbanListRepository.deleteKanbanList(listId);
+    kanbanLists.removeWhere((list) => list.id == listId);
+    try {
+      await _kanbanListRepository.deleteKanbanList(listId);
+    } catch (e) {
+      print("Erro ao excluir coluna: $e");
+    }
   }
 
   @action
@@ -84,24 +115,14 @@ abstract class _KanbanStore with Store {
     final KanbanList movedList = kanbanLists.removeAt(oldIndex);
     kanbanLists.insert(newIndex, movedList);
 
-    // Update order in Firestore
     for (int i = 0; i < kanbanLists.length; i++) {
       kanbanLists[i].order = i;
     }
     await _kanbanListRepository.updateKanbanLists(kanbanLists.toList());
   }
 
-  // Method to move a task between Kanban lists
   @action
-  Future<void> moveTaskBetweenKanbanLists(
-      String taskId, String oldListId, String newListId) async {
-    final oldList = kanbanLists.firstWhere((list) => list.id == oldListId);
-    final newList = kanbanLists.firstWhere((list) => list.id == newListId);
-
-    oldList.taskIds.remove(taskId);
-    newList.taskIds.add(taskId);
-
-    await _kanbanListRepository.updateKanbanList(oldList);
-    await _kanbanListRepository.updateKanbanList(newList);
+  void dispose() {
+    _kanbanListsSubscription?.cancel();
   }
 }

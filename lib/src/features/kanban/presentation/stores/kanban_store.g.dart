@@ -45,16 +45,6 @@ mixin _$KanbanStore on _KanbanStore, Store {
     });
   }
 
-  late final _$loadKanbanListsAsyncAction = AsyncAction(
-    '_KanbanStore.loadKanbanLists',
-    context: context,
-  );
-
-  @override
-  Future<void> loadKanbanLists() {
-    return _$loadKanbanListsAsyncAction.run(() => super.loadKanbanLists());
-  }
-
   late final _$_createDefaultKanbanListAsyncAction = AsyncAction(
     '_KanbanStore._createDefaultKanbanList',
     context: context,
@@ -113,20 +103,33 @@ mixin _$KanbanStore on _KanbanStore, Store {
     );
   }
 
-  late final _$moveTaskBetweenKanbanListsAsyncAction = AsyncAction(
-    '_KanbanStore.moveTaskBetweenKanbanLists',
+  late final _$_KanbanStoreActionController = ActionController(
+    name: '_KanbanStore',
     context: context,
   );
 
   @override
-  Future<void> moveTaskBetweenKanbanLists(
-    String taskId,
-    String oldListId,
-    String newListId,
-  ) {
-    return _$moveTaskBetweenKanbanListsAsyncAction.run(
-      () => super.moveTaskBetweenKanbanLists(taskId, oldListId, newListId),
+  Future<void> loadKanbanLists() {
+    final _$actionInfo = _$_KanbanStoreActionController.startAction(
+      name: '_KanbanStore.loadKanbanLists',
     );
+    try {
+      return super.loadKanbanLists();
+    } finally {
+      _$_KanbanStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void dispose() {
+    final _$actionInfo = _$_KanbanStoreActionController.startAction(
+      name: '_KanbanStore.dispose',
+    );
+    try {
+      return super.dispose();
+    } finally {
+      _$_KanbanStoreActionController.endAction(_$actionInfo);
+    }
   }
 
   @override
