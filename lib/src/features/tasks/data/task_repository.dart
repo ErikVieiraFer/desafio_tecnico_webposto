@@ -17,13 +17,23 @@ class TaskRepository {
       );
 
   Stream<List<Task>> getTasks(String userId) {
-    return _tasksRef(userId).snapshots().map((snapshot) {
+    return _tasksRef(userId).orderBy('endDate').snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => doc.data()).toList();
     });
   }
 
-  Future<void> addTask(String userId, Task task) async {
-    await _tasksRef(userId).add(task);
+  Stream<List<Task>> getTasksByKanbanListId(String userId, String kanbanListId) {
+    return _tasksRef(userId)
+        .where('kanbanListId', isEqualTo: kanbanListId)
+        .orderBy('position')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => doc.data()).toList();
+    });
+  }
+
+  Future<DocumentReference<Task>> addTask(String userId, Task task) async {
+    return _tasksRef(userId).add(task);
   }
 
   Future<void> updateTask(String userId, Task task) async {

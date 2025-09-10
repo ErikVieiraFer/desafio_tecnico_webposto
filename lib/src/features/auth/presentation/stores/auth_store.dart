@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
-import 'package:desafio_tecnico/src/features/auth/data/auth_repository.dart';
+import 'package:desafio_tecnico/src/repositories/auth_repository.dart';
 import 'package:desafio_tecnico/src/repositories/auth_exception.dart';
 import 'dart:async';
 
@@ -36,7 +36,7 @@ abstract class _AuthStoreBase with Store {
     isLoading = true;
     error = null;
     try {
-      await _authRepository.signIn(email, password);
+      await _authRepository.signInWithEmailAndPassword(email: email, password: password);
     } on AuthException catch (e) {
       error = e.message;
       throw e;
@@ -53,7 +53,7 @@ abstract class _AuthStoreBase with Store {
     isLoading = true;
     error = null;
     try {
-      await _authRepository.signUp(email, password);
+      await _authRepository.createUserWithEmailAndPassword(email: email, password: password);
     } on AuthException catch (e) {
       error = e.message;
       throw e;
@@ -67,10 +67,14 @@ abstract class _AuthStoreBase with Store {
 
   @action
   Future<void> signInWithGoogle() async {
+    // This method is not implemented in the current AuthRepository
+    // You might need to add it to AuthRepository or remove this call if not needed.
     isLoading = true;
     error = null;
     try {
-      await _authRepository.signInWithGoogle();
+      // await _authRepository.signInWithGoogle(); // Commented out
+      error = 'Login com Google não implementado.';
+      throw AuthException('Login com Google não implementado.');
     } on AuthException catch (e) {
       error = e.message;
       throw e;

@@ -19,8 +19,8 @@ class TaskRepository {
     });
   }
 
-  Future<void> addTask(String userId, Task task) async {
-    await _tasksRef(userId).add(task);
+  Future<DocumentReference<Task>> addTask(String userId, Task task) async {
+    return await _tasksRef(userId).add(task);
   }
 
   Future<void> updateTask(String userId, Task task) async {

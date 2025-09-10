@@ -5,19 +5,30 @@ class Task {
   final String? id;
   final String title;
   final String description;
-  final bool isDone;
+  final bool isCompleted;
   final List<String> tagIds;
+  final String? kanbanListId;
+  final int position;
+  final Timestamp? startDate;
+  final Timestamp? endDate;
+  final Timestamp createdAt;
+  final Timestamp updatedAt;
 
-  // Este campo não é salvo no Firestore, mas populado após a busca.
   List<Tag> tags;
 
   Task({
     this.id,
     required this.title,
     required this.description,
-    this.isDone = false,
+    this.isCompleted = false,
     this.tagIds = const [],
     this.tags = const [],
+    this.kanbanListId,
+    required this.position,
+    this.startDate,
+    this.endDate,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory Task.fromMap(DocumentSnapshot doc) {
@@ -26,8 +37,14 @@ class Task {
       id: doc.id,
       title: data['title'] ?? '',
       description: data['description'] ?? '',
-      isDone: data['isDone'] ?? false,
+      isCompleted: data['isCompleted'] ?? false,
       tagIds: List<String>.from(data['tagIds'] ?? []),
+      kanbanListId: data['kanbanListId'] as String?,
+      position: data['position'] ?? 0,
+      startDate: data['startDate'] as Timestamp?,
+      endDate: data['endDate'] as Timestamp?,
+      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(), // Handle null
+      updatedAt: data['updatedAt'] as Timestamp? ?? Timestamp.now(), // Handle null
     );
   }
 
@@ -35,8 +52,14 @@ class Task {
     return {
       'title': title,
       'description': description,
-      'isDone': isDone,
+      'isCompleted': isCompleted,
       'tagIds': tagIds,
+      'kanbanListId': kanbanListId,
+      'position': position,
+      'startDate': startDate,
+      'endDate': endDate,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 
@@ -44,17 +67,29 @@ class Task {
     String? id,
     String? title,
     String? description,
-    bool? isDone,
+    bool? isCompleted,
     List<String>? tagIds,
     List<Tag>? tags,
+    String? kanbanListId,
+    int? position,
+    Timestamp? startDate,
+    Timestamp? endDate,
+    Timestamp? createdAt,
+    Timestamp? updatedAt,
   }) {
     return Task(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      isDone: isDone ?? this.isDone,
+      isCompleted: isCompleted ?? this.isCompleted,
       tagIds: tagIds ?? this.tagIds,
       tags: tags ?? this.tags,
+      kanbanListId: kanbanListId ?? this.kanbanListId,
+      position: position ?? this.position,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

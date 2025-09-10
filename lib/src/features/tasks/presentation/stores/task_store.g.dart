@@ -91,6 +91,24 @@ mixin _$TaskStore on _TaskStoreBase, Store {
     });
   }
 
+  late final _$dateFilterAtom = Atom(
+    name: '_TaskStoreBase.dateFilter',
+    context: context,
+  );
+
+  @override
+  DateTimeRange<DateTime>? get dateFilter {
+    _$dateFilterAtom.reportRead();
+    return super.dateFilter;
+  }
+
+  @override
+  set dateFilter(DateTimeRange<DateTime>? value) {
+    _$dateFilterAtom.reportWrite(value, super.dateFilter, () {
+      super.dateFilter = value;
+    });
+  }
+
   late final _$fetchTasksAsyncAction = AsyncAction(
     '_TaskStoreBase.fetchTasks',
     context: context,
@@ -149,6 +167,18 @@ mixin _$TaskStore on _TaskStoreBase, Store {
   }
 
   @override
+  void setDateFilter(DateTimeRange<DateTime>? range) {
+    final _$actionInfo = _$_TaskStoreBaseActionController.startAction(
+      name: '_TaskStoreBase.setDateFilter',
+    );
+    try {
+      return super.setDateFilter(range);
+    } finally {
+      _$_TaskStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void dispose() {
     final _$actionInfo = _$_TaskStoreBaseActionController.startAction(
       name: '_TaskStoreBase.dispose',
@@ -167,6 +197,7 @@ tasks: ${tasks},
 isLoading: ${isLoading},
 error: ${error},
 selectedTag: ${selectedTag},
+dateFilter: ${dateFilter},
 filteredTasks: ${filteredTasks},
 allTags: ${allTags}
     ''';

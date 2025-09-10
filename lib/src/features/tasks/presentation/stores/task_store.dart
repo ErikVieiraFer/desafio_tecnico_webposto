@@ -2,6 +2,7 @@ import 'package:desafio_tecnico/src/features/tasks/data/task_repository.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/tag.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/stores/tag_store.dart';
+import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
@@ -29,14 +30,30 @@ abstract class _TaskStoreBase with Store {
   @observable
   String? selectedTag;
 
+  @observable
+  DateTimeRange? dateFilter;
+
   @computed
   List<Task> get filteredTasks {
-    if (selectedTag == null || selectedTag!.isEmpty) {
-      return tasks;
+    List<Task> filtered = List.from(tasks);
+
+    if (selectedTag != null && selectedTag!.isNotEmpty) {
+      filtered = filtered
+          .where((task) => task.tags.any((tag) => tag.name == selectedTag))
+          .toList();
     }
-    return tasks
-        .where((task) => task.tags.any((tag) => tag.name == selectedTag))
-        .toList();
+
+    if (dateFilter != null) {
+      filtered = filtered.where((task) {
+        if (task.startDate == null || task.endDate == null) return false;
+        final taskStart = task.startDate!.toDate();
+        final taskEnd = task.endDate!.toDate();
+        return dateFilter!.start.isBefore(taskEnd) &&
+            dateFilter!.end.isAfter(taskStart);
+      }).toList();
+    }
+
+    return filtered;
   }
 
   @computed
@@ -54,6 +71,11 @@ abstract class _TaskStoreBase with Store {
   }
 
   @action
+  void setDateFilter(DateTimeRange? range) {
+    dateFilter = range;
+  }
+
+  @action
   Future<void> fetchTasks(String userId) async {
     isLoading = true;
     error = null;
@@ -66,13 +88,12 @@ abstract class _TaskStoreBase with Store {
       tasksStream,
       tagsStream,
       (List<Task> taskList, List<Tag> tagList) {
-        // Cria um mapa de tags para busca rápida
         final tagMap = {for (var tag in tagList) tag.id: tag};
 
         for (var task in taskList) {
           task.tags = task.tagIds
-              .map((tagId) => tagMap[tagId]) // Busca a tag no mapa
-              .whereType<Tag>() // Filtra os nulos de forma segura
+              .map((tagId) => tagMap[tagId])
+              .whereType<Tag>()
               .toList();
         }
         return taskList;
@@ -93,11 +114,18 @@ abstract class _TaskStoreBase with Store {
     );
   }
 
+  Stream<List<Task>> getTasksByKanbanListId(String userId, String kanbanListId) {
+    return _taskRepository.getTasksByKanbanListId(userId, kanbanListId);
+  }
+
   @action
   Future<void> addTask(String userId, Task task) async {
     try {
+      print('TaskStore: Attempting to add task for userId: $userId, title: ${task.title}');
       await _taskRepository.addTask(userId, task);
+      print('TaskStore: Task added successfully to Firestore!');
     } catch (e) {
+      print('TaskStore: Error adding task: $e');
       error = e.toString();
     }
   }

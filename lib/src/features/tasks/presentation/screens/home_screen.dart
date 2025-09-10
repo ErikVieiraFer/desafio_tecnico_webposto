@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:desafio_tecnico/main.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/providers.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/screens/add_task_screen.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/screens/edit_task_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:desafio_tecnico/src/features/news/presentation/widgets/news_card_widget.dart';
+import 'package:desafio_tecnico/src/features/kanban/presentation/screens/kanban_screen.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,14 +16,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final String _userId = 'test_user_id'; // TODO: Substituir pelo ID do usuário logado
+  // Removed _userId as it will be fetched from authStore
 
   @override
   void initState() {
     super.initState();
     // Inicia o fetch de ambas as listas
-    tagStore.fetchTags(_userId);
-    taskStore.fetchTasks(_userId);
+    if (authStore.user != null) {
+      tagStore.fetchTags(authStore.user!.uid);
+      taskStore.fetchTasks(authStore.user!.uid);
+    }
   }
 
   @override
@@ -31,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _showFilterDialog(BuildContext context) {
+  void _showTagFilterDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -73,6 +77,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _showDateFilterPicker() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDateRange: taskStore.dateFilter,
+    );
+    if (picked != null) {
+      taskStore.setDateFilter(picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -83,7 +99,13 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
-            onPressed: () => _showFilterDialog(context),
+            tooltip: 'Filtrar por Etiqueta',
+            onPressed: () => _showTagFilterDialog(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.date_range),
+            tooltip: 'Filtrar por Data',
+            onPressed: _showDateFilterPicker,
           ),
           IconButton(
             icon: const Icon(Icons.add),
@@ -92,6 +114,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AddTaskScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.view_kanban), // Or Icons.dashboard, Icons.grid_view
+            tooltip: 'Visualizar Kanban',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KanbanScreen(),
                 ),
               );
             },
@@ -135,6 +169,33 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          Observer(
+            builder: (_) {
+              if (taskStore.dateFilter == null && taskStore.selectedTag == null) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                child: Wrap(
+                  spacing: 8.0,
+                  children: [
+                    if (taskStore.selectedTag != null)
+                      Chip(
+                        label: Text('Etiqueta: ${taskStore.selectedTag}'),
+                        onDeleted: () => taskStore.setTagFilter(null),
+                      ),
+                    if (taskStore.dateFilter != null)
+                      Chip(
+                        label: Text(
+                          'Período: ${DateFormat('dd/MM/yy').format(taskStore.dateFilter!.start)} - ${DateFormat('dd/MM/yy').format(taskStore.dateFilter!.end)}',
+                        ),
+                        onDeleted: () => taskStore.setDateFilter(null),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
           Expanded(
             child: Observer(
               builder: (_) {
@@ -150,10 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 if (taskStore.filteredTasks.isEmpty) {
-                  return Center(
-                    child: Text(taskStore.selectedTag == null
-                        ? 'Nenhuma tarefa ainda. Adicione uma!'
-                        : 'Nenhuma tarefa com a etiqueta "${taskStore.selectedTag}"'),
+                  return const Center(
+                    child: Text('Nenhuma tarefa encontrada para os filtros selecionados.'),
                   );
                 }
 
@@ -162,10 +221,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final task = taskStore.filteredTasks[index];
                     return Dismissible(
-                      key: Key(task.id!),
+                      key: ValueKey(task.id ?? UniqueKey().toString()),
                       direction: DismissDirection.endToStart,
                       onDismissed: (direction) {
-                        taskStore.deleteTask(_userId, task.id!);
+                        if (authStore.user != null) {
+                          taskStore.deleteTask(authStore.user!.uid, task.id!);
+                        }
                       },
                       background: Container(
                         color: theme.colorScheme.secondary,
@@ -178,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           task.title,
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: theme.colorScheme.onPrimary,
-                            decoration: task.isDone
+                            decoration: task.isCompleted
                                 ? TextDecoration.lineThrough
                                 : null,
                           ),
@@ -192,12 +253,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                 task.description,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onPrimary.withAlpha(204),
-                                  decoration: task.isDone
+                                  decoration: task.isCompleted
                                       ? TextDecoration.lineThrough
                                       : null,
                                 ),
                               ),
                             ),
+                            if (task.endDate != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      size: 14,
+                                      color: theme.colorScheme.onPrimary.withAlpha(204),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Vence em: ${DateFormat('dd/MM/yyyy').format(task.endDate!.toDate())}',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onPrimary.withAlpha(204),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             if (task.tags.isNotEmpty)
                               Wrap(
                                 spacing: 6.0,
@@ -230,13 +311,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                             ),
                             Checkbox(
-                              value: task.isDone,
+                              value: task.isCompleted,
                               onChanged: (value) {
                                 if (value != null) {
                                   final updatedTask = task.copyWith(
-                                    isDone: value,
+                                    isCompleted: value,
+                                    createdAt: task.createdAt,
+                                    updatedAt: Timestamp.now(), 
                                   );
-                                  taskStore.updateTask(_userId, updatedTask);
+                                  if (authStore.user != null) {
+                                    taskStore.updateTask(authStore.user!.uid, updatedTask);
+                                  }
                                 }
                               },
                               activeColor: theme.colorScheme.secondary,

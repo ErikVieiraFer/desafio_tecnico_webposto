@@ -65,6 +65,15 @@ abstract class _TagStoreBase with Store {
   }
 
   @action
+  Future<void> deleteTag(String userId, String tagId) async {
+    try {
+      await _tagRepository.deleteTag(userId, tagId);
+    } catch (e) {
+      error = e.toString();
+    }
+  }
+
+  @action
   void dispose() {
     _tagsSubscription?.cancel();
   }

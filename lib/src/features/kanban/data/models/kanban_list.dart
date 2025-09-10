@@ -1,0 +1,64 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class KanbanList {
+  String id;
+  String name;
+  int order;
+  String userId;
+  List<String> taskIds;
+
+  KanbanList({
+    required this.id,
+    required this.name,
+    required this.order,
+    required this.userId,
+    this.taskIds = const [],
+  });
+
+  // Add copyWith method
+  KanbanList copyWith({
+    String? id,
+    String? name,
+    int? order,
+    String? userId,
+    List<String>? taskIds,
+  }) {
+    return KanbanList(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      order: order ?? this.order,
+      userId: userId ?? this.userId,
+      taskIds: taskIds ?? this.taskIds,
+    );
+  }
+
+  factory KanbanList.fromMap(Map<String, dynamic> map, String id) {
+    return KanbanList(
+      id: id,
+      name: map['name'] ?? '',
+      order: map['order'] ?? 0,
+      userId: map['userId'] ?? '',
+      taskIds: List<String>.from(map['taskIds'] ?? []),
+    );
+  }
+
+  factory KanbanList.fromSnapshot(DocumentSnapshot snapshot) {
+    final data = snapshot.data() as Map<String, dynamic>;
+    return KanbanList(
+      id: snapshot.id,
+      name: data['name'] ?? '',
+      order: data['order'] ?? 0,
+      userId: data['userId'] ?? '',
+      taskIds: List<String>.from(data['taskIds'] ?? []),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'order': order,
+      'userId': userId,
+      'taskIds': taskIds,
+    };
+  }
+}

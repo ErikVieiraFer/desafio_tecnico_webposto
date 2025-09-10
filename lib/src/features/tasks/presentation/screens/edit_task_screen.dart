@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:desafio_tecnico/main.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/tag.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/providers.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/screens/add_task_screen.dart'; // Reutilizando o diálogo
+import 'package:desafio_tecnico/src/features/tasks/presentation/widgets/tag_selection_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class EditTaskScreen extends StatefulWidget {
   final Task task;
@@ -17,6 +19,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   final List<Tag> _selectedTags = [];
+  DateTimeRange? _selectedDateRange;
 
   @override
   void initState() {
@@ -24,6 +27,13 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     _titleController = TextEditingController(text: widget.task.title);
     _descriptionController = TextEditingController(text: widget.task.description);
     _selectedTags.addAll(widget.task.tags);
+
+    if (widget.task.startDate != null && widget.task.endDate != null) {
+      _selectedDateRange = DateTimeRange(
+        start: widget.task.startDate!.toDate(),
+        end: widget.task.endDate!.toDate(),
+      );
+    }
   }
 
   void _saveTask() {
@@ -38,8 +48,15 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
       title: _titleController.text,
       description: _descriptionController.text,
       tagIds: _selectedTags.map((t) => t.id!).toList(),
+      startDate: _selectedDateRange?.start != null
+          ? Timestamp.fromDate(_selectedDateRange!.start)
+          : null,
+      endDate: _selectedDateRange?.end != null
+          ? Timestamp.fromDate(_selectedDateRange!.end)
+          : null,
+      updatedAt: Timestamp.now(),
     );
-    taskStore.updateTask('test_user_id', updatedTask);
+    taskStore.updateTask(authStore.user!.uid, updatedTask);
     Navigator.of(context).pop();
   }
 
@@ -60,11 +77,26 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
     );
   }
 
+  Future<void> _showDateRangePicker() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDateRange: _selectedDateRange,
+    );
+    if (picked != null && picked != _selectedDateRange) {
+      setState(() {
+        _selectedDateRange = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Editar Tarefa')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -85,8 +117,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               label: const Text('Adicionar/Gerenciar Etiquetas'),
               onPressed: _showTagSelectionDialog,
               style: OutlinedButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                side: BorderSide(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5)),
+                foregroundColor: theme.colorScheme.onPrimary,
+                side: BorderSide(color: theme.colorScheme.onPrimary.withAlpha(128)),
               ),
             ),
             const SizedBox(height: 16.0),
@@ -101,7 +133,25 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 );
               }).toList(),
             ),
-            const Spacer(),
+            const SizedBox(height: 24.0),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.calendar_today),
+              label: const Text('Definir Prazo'),
+              onPressed: _showDateRangePicker,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.colorScheme.onPrimary,
+                side: BorderSide(color: theme.colorScheme.onPrimary.withAlpha(128)),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            if (_selectedDateRange != null)
+              Center(
+                child: Text(
+                  'Prazo: ${DateFormat('dd/MM/yy').format(_selectedDateRange!.start)} - ${DateFormat('dd/MM/yy').format(_selectedDateRange!.end)}',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+            const SizedBox(height: 48.0),
             ElevatedButton(
               onPressed: _saveTask,
               child: const Text('Salvar Alterações'),

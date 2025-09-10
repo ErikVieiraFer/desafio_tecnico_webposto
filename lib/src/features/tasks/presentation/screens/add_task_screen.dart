@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:desafio_tecnico/main.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/tag.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/providers.dart';
+import 'package:desafio_tecnico/src/features/tasks/presentation/widgets/tag_selection_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 
 class AddTaskScreen extends StatefulWidget {
-  const AddTaskScreen({super.key});
+  final String? kanbanListId;
+
+  const AddTaskScreen({super.key, this.kanbanListId});
 
   @override
   State<AddTaskScreen> createState() => _AddTaskScreenState();
@@ -16,8 +19,18 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final List<Tag> _selectedTags = [];
+  DateTimeRange? _selectedDateRange;
 
-  void _saveTask() {
+  @override
+  void initState() {
+    super.initState();
+    // Ensure stores are initialized
+    if (authStore.user != null) {
+      tagStore.fetchTags(authStore.user!.uid);
+    }
+  }
+
+  void _saveTask() async {
     if (_titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('O título é obrigatório.')),
@@ -25,12 +38,49 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       return;
     }
 
+    if (authStore.user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Você precisa estar logado para criar uma tarefa.')),
+      );
+      return;
+    }
+
+    String targetKanbanListId;
+    if (widget.kanbanListId != null) {
+      targetKanbanListId = widget.kanbanListId!;
+    } else {
+      // Fetch kanban lists if they are not loaded
+      if (kanbanStore.kanbanLists.isEmpty) {
+        await kanbanStore.loadKanbanLists();
+      }
+      // Default to the first list if available
+      if (kanbanStore.kanbanLists.isNotEmpty) {
+        targetKanbanListId = kanbanStore.kanbanLists.first.id;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nenhuma coluna Kanban encontrada para adicionar a tarefa.')),
+        );
+        return;
+      }
+    }
+
     final task = Task(
       title: _titleController.text,
       description: _descriptionController.text,
-      tagIds: _selectedTags.map((t) => t.id!).toList(),
+      tagIds: _selectedTags.map((t) => t.id).whereType<String>().toList(),
+      kanbanListId: targetKanbanListId,
+      position: DateTime.now().millisecondsSinceEpoch,
+      startDate: _selectedDateRange?.start != null
+          ? Timestamp.fromDate(_selectedDateRange!.start)
+          : null,
+      endDate: _selectedDateRange?.end != null
+          ? Timestamp.fromDate(_selectedDateRange!.end)
+          : null,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
     );
-    taskStore.addTask('test_user_id', task);
+
+    await taskStore.addTask(authStore.user!.uid, task);
     Navigator.of(context).pop();
   }
 
@@ -51,13 +101,27 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     );
   }
 
+  Future<void> _showDateRangePicker() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDateRange: _selectedDateRange,
+    );
+    if (picked != null && picked != _selectedDateRange) {
+      setState(() {
+        _selectedDateRange = picked;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Nova Tarefa')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,7 +143,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               onPressed: _showTagSelectionDialog,
               style: OutlinedButton.styleFrom(
                 foregroundColor: theme.colorScheme.onPrimary,
-                side: BorderSide(color: theme.colorScheme.onPrimary.withOpacity(0.5)),
+                side: BorderSide(color: theme.colorScheme.onPrimary.withAlpha(128)),
               ),
             ),
             const SizedBox(height: 16.0),
@@ -94,156 +158,29 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 );
               }).toList(),
             ),
-            const Spacer(),
+            const SizedBox(height: 24.0),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.calendar_today),
+              label: const Text('Definir Prazo'),
+              onPressed: _showDateRangePicker,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.colorScheme.onPrimary,
+                side: BorderSide(color: theme.colorScheme.onPrimary.withAlpha(128)),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            if (_selectedDateRange != null)
+              Center(
+                child: Text(
+                  'Prazo: ${DateFormat('dd/MM/yy').format(_selectedDateRange!.start)} - ${DateFormat('dd/MM/yy').format(_selectedDateRange!.end)}',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+            const SizedBox(height: 48.0),
             ElevatedButton(onPressed: _saveTask, child: const Text('Salvar')),
           ],
         ),
       ),
-    );
-  }
-}
-
-class TagSelectionDialog extends StatefulWidget {
-  final List<Tag> selectedTags;
-  final ValueChanged<List<Tag>> onSelectionChanged;
-
-  const TagSelectionDialog({
-    super.key,
-    required this.selectedTags,
-    required this.onSelectionChanged,
-  });
-
-  @override
-  State<TagSelectionDialog> createState() => _TagSelectionDialogState();
-}
-
-class _TagSelectionDialogState extends State<TagSelectionDialog> {
-  late final List<Tag> _tempSelectedTags;
-
-  @override
-  void initState() {
-    super.initState();
-    _tempSelectedTags = List.from(widget.selectedTags);
-  }
-
-  void _showCreateTagDialog() {
-    final nameController = TextEditingController();
-    Color pickerColor = Colors.blue;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        final theme = Theme.of(context);
-        return AlertDialog(
-          title: const Text('Criar Nova Etiqueta'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Nome da Etiqueta'),
-              ),
-              const SizedBox(height: 20),
-              ColorPicker(
-                pickerColor: pickerColor,
-                onColorChanged: (color) => pickerColor = color,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.secondary,
-              ),
-            ),
-            ElevatedButton(
-              child: const Text('Criar'),
-              onPressed: () {
-                final name = nameController.text.trim();
-                if (name.isNotEmpty) {
-                  final newTag = Tag(name: name, color: pickerColor.value);
-                  tagStore.addTag('test_user_id', newTag);
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return AlertDialog(
-      title: const Text('Selecione as Etiquetas'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Criar nova etiqueta'),
-              onPressed: _showCreateTagDialog,
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.onPrimary,
-              ),
-            ),
-            const Divider(),
-            Expanded(
-              child: Observer(
-                builder: (_) {
-                  if (tagStore.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: tagStore.tags.length,
-                    itemBuilder: (context, index) {
-                      final tag = tagStore.tags[index];
-                      final isSelected = _tempSelectedTags.any((t) => t.id == tag.id);
-                      return CheckboxListTile(
-                        title: Text(tag.name),
-                        value: isSelected,
-                        secondary: CircleAvatar(backgroundColor: Color(tag.color), radius: 10),
-                        onChanged: (bool? selected) {
-                          setState(() {
-                            if (selected == true) {
-                              _tempSelectedTags.add(tag);
-                            } else {
-                              _tempSelectedTags.removeWhere((t) => t.id == tag.id);
-                            }
-                          });
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: const Text('Cancelar'),
-          onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(
-            foregroundColor: theme.colorScheme.secondary,
-          ),
-        ),
-        ElevatedButton(
-          child: const Text('Confirmar'),
-          onPressed: () {
-            widget.onSelectionChanged(_tempSelectedTags);
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
     );
   }
 }

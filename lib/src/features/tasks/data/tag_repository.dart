@@ -31,4 +31,8 @@ class TagRepository {
   Future<DocumentReference<Tag>> addTag(String userId, Tag tag) async {
     return await _tagsRef(userId).add(tag);
   }
+
+  Future<void> deleteTag(String userId, String tagId) async {
+    await _tagsRef(userId).doc(tagId).delete();
+  }
 }
