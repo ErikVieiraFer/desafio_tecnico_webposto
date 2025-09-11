@@ -64,6 +64,7 @@ class AuthRepository {
 
   Future<void> signInWithGoogle() async {
     try {
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         throw AuthException('Login com Google cancelado.');
@@ -91,17 +92,17 @@ class AuthRepository {
   String _mapFirebaseAuthException(FirebaseAuthException e) {
     switch (e.code) {
       case 'invalid-email':
-        return 'E-mail invlido.';
+        return 'E-mail invalido.';
       case 'user-disabled':
-        return 'Este usurio foi desabilitado.';
+        return 'Este usuario foi desabilitado.';
       case 'user-not-found':
-        return 'Usurio no encontrado.';
+        return 'Usuario nao encontrado.';
       case 'wrong-password':
         return 'Senha incorreta.';
       case 'email-already-in-use':
-        return 'Este e-mail j est em uso.';
+        return 'Este e-mail ja esta em uso.';
       case 'operation-not-allowed':
-        return 'Operao no permitida.';
+        return 'Operacao nao permitida.';
       case 'weak-password':
         return 'Senha muito fraca.';
       default:
