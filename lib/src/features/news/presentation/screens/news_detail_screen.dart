@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:desafio_tecnico/src/features/news/domain/news_article.dart';
+import 'package:desafio_tecnico/src/features/news/domain/models/article.dart';
 
 class NewsDetailScreen extends StatefulWidget {
-  final NewsArticle article;
+  final Article article;
 
   const NewsDetailScreen({super.key, required this.article});
 

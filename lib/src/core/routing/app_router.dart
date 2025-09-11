@@ -3,7 +3,7 @@ import 'package:desafio_tecnico/src/core/routing/auth_wrapper.dart';
 import 'package:desafio_tecnico/src/features/auth/presentation/screens/login_screen.dart';
 import 'package:desafio_tecnico/src/features/auth/presentation/screens/registration_screen.dart';
 import 'package:desafio_tecnico/src/features/kanban/presentation/screens/kanban_screen.dart';
-import 'package:desafio_tecnico/src/features/news/domain/news_article.dart';
+import 'package:desafio_tecnico/src/features/news/domain/models/article.dart';
 import 'package:desafio_tecnico/src/features/news/presentation/screens/news_detail_screen.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
 import 'package:desafio_tecnico/src/features/tasks/presentation/screens/add_task_screen.dart';
@@ -39,7 +39,7 @@ class AppRouter {
       case kanban:
         return MaterialPageRoute(builder: (_) => const KanbanScreen());
       case newsDetail:
-        final article = settings.arguments as NewsArticle;
+        final article = settings.arguments as Article;
         return MaterialPageRoute(builder: (_) => NewsDetailScreen(article: article));
       default:
         return MaterialPageRoute(

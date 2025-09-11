@@ -210,9 +210,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 4.0),
                   child: ListTile(
-                    title: Text(comment.authorName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(comment.content),
-                    trailing: Text(
+                    title: Text(comment.content),
+                    subtitle: Text(
                       DateFormat('dd/MM/yy HH:mm').format(comment.timestamp.toDate()),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
