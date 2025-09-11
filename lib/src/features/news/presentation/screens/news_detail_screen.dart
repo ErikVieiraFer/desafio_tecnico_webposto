@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:desafio_tecnico/src/features/news/domain/news_article.dart';
 
 class NewsDetailScreen extends StatefulWidget {
-  final String url;
+  final NewsArticle article;
 
-  const NewsDetailScreen({super.key, required this.url});
+  const NewsDetailScreen({super.key, required this.article});
 
   @override
   State<NewsDetailScreen> createState() => _NewsDetailScreenState();
@@ -33,14 +34,14 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
           },
         ),
       )
-      ..loadRequest(Uri.parse(widget.url));
+      ..loadRequest(Uri.parse(widget.article.url));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notícia'),
+        title: Text(widget.article.title),
       ),
       body: WebViewWidget(controller: controller),
     );

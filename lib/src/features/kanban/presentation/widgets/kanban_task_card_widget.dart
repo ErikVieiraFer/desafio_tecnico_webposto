@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:desafio_tecnico/main.dart';
+import 'package:desafio_tecnico/src/core/routing/app_router.dart';
 import 'package:desafio_tecnico/src/core/ui/theme/app_theme.dart';
 import 'package:desafio_tecnico/src/features/tasks/domain/task.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/screens/edit_task_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -21,8 +21,8 @@ class KanbanTaskCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColor = isDarkMode ? AppTheme.fontColor : AppTheme.primaryColor;
-    final textColor = isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor;
+    final cardColor = isDarkMode ? AppTheme.backgroundBlue : AppTheme.fontWhite;
+    final textColor = isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue;
 
     final cardContent = Card(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -50,11 +50,10 @@ class KanbanTaskCardWidget extends StatelessWidget {
                   icon: Icon(Icons.more_vert, color: textColor),
                   onSelected: (value) {
                     if (value == 'edit') {
-                      Navigator.push(
+                      Navigator.pushNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => EditTaskScreen(task: task),
-                        ),
+                        AppRouter.editTask,
+                        arguments: task,
                       );
                     } else if (value == 'delete') {
                       showDialog(
@@ -109,7 +108,7 @@ class KanbanTaskCardWidget extends StatelessWidget {
                 child: Text(
                   task.description,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: textColor.withAlpha(204),
+                    color: textColor.withOpacity(0.8),
                     decoration:
                         task.isCompleted ? TextDecoration.lineThrough : null,
                   ),
@@ -123,12 +122,12 @@ class KanbanTaskCardWidget extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(Icons.calendar_today,
-                        size: 14, color: textColor.withAlpha(204)),
+                        size: 14, color: textColor.withOpacity(0.8)),
                     const SizedBox(width: 6),
                     Text(
                       'Vence em: ${DateFormat('dd/MM/yy').format(task.endDate!.toDate())}',
                       style: theme.textTheme.bodySmall
-                          ?.copyWith(color: textColor.withAlpha(204)),
+                          ?.copyWith(color: textColor.withOpacity(0.8)),
                     ),
                   ],
                 ),
@@ -159,7 +158,7 @@ class KanbanTaskCardWidget extends StatelessWidget {
                   if (value != null) {
                     final updatedTask = task.copyWith(
                       isCompleted: value,
-                      createdAt: task.createdAt, // Preserve createdAt
+                      createdAt: task.createdAt,
                       updatedAt: Timestamp.now(),
                     );
                     if (authStore.user != null) {
@@ -191,7 +190,7 @@ class KanbanTaskCardWidget extends StatelessWidget {
       childWhenDragging: Card(
         margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
         color:
-            (isDarkMode ? AppTheme.fontColor : AppTheme.primaryColor).withAlpha(128),
+            (isDarkMode ? AppTheme.backgroundBlue : AppTheme.fontWhite).withOpacity(0.5),
         child: const SizedBox(
           height: 100,
         ),

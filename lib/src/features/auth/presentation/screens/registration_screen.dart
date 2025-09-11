@@ -1,10 +1,7 @@
 import 'package:desafio_tecnico/main.dart';
-import 'package:desafio_tecnico/src/features/auth/presentation/stores/registration_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
-
-final registrationStore = RegistrationStore(authStore);
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -21,22 +18,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.initState();
 
     _disposers = [
-      reaction((_) => registrationStore.error, (String? error) {
+      reaction((_) => authStore.error, (String? error) {
         if (error != null && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(error), backgroundColor: Colors.red),
           );
         }
       }),
-      reaction((_) => registrationStore.isRegistrationSuccess, (bool success) {
-        if (success && mounted) {
+      reaction((_) => authStore.user, (user) {
+        if (user != null && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Cadastro realizado com sucesso!'),
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.of(context).pop();
         }
       }),
     ];
@@ -77,14 +73,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 48.0),
               Observer(
                 builder: (_) => TextFormField(
-                  onChanged: registrationStore.setName,
+                  onChanged: authStore.setName,
                   decoration: const InputDecoration(labelText: 'Nome'),
                 ),
               ),
               const SizedBox(height: 16.0),
               Observer(
                 builder: (_) => TextFormField(
-                  onChanged: registrationStore.setEmail,
+                  onChanged: authStore.setEmail,
                   decoration: const InputDecoration(labelText: 'E-mail'),
                   keyboardType: TextInputType.emailAddress,
                 ),
@@ -92,7 +88,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 16.0),
               Observer(
                 builder: (_) => TextFormField(
-                  onChanged: registrationStore.setPassword,
+                  onChanged: authStore.setPassword,
                   decoration: const InputDecoration(
                     labelText: 'Senha (mín. 6 caracteres)',
                   ),
@@ -102,7 +98,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 16.0),
               Observer(
                 builder: (_) => TextFormField(
-                  onChanged: registrationStore.setConfirmPassword,
+                  onChanged: authStore.setConfirmPassword,
                   decoration: const InputDecoration(
                     labelText: 'Confirmar Senha',
                   ),
@@ -113,10 +109,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               Observer(
                 builder: (_) {
                   return ElevatedButton(
-                    onPressed: registrationStore.isLoading
+                    onPressed: authStore.isLoading
                         ? null
-                        : registrationStore.register,
-                    child: registrationStore.isLoading
+                        : authStore.createUserWithEmailAndPassword,
+                    child: authStore.isLoading
                         ? const SizedBox(
                             height: 24,
                             width: 24,

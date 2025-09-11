@@ -19,25 +19,25 @@ class RenameColumnDialog extends StatelessWidget {
     return AlertDialog(
       title: Text(
         'Renomear Coluna',
-        style: TextStyle(color: isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor),
+        style: TextStyle(color: isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue),
       ),
       content: TextField(
         controller: nameController,
         decoration: InputDecoration(
           hintText: 'Novo Nome da Coluna',
-          hintStyle: TextStyle(color: (isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor).withAlpha(179)),
+          hintStyle: TextStyle(color: (isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue).withOpacity(0.7)),
         ),
-        style: TextStyle(color: isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor),
+        style: TextStyle(color: isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue),
       ),
       actions: <Widget>[
         TextButton(
-          child: Text('Cancelar', style: TextStyle(color: AppTheme.accentColor)),
+          child: Text('Cancelar', style: TextStyle(color: AppTheme.detailRed)),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         TextButton(
-          child: Text('Renomear', style: TextStyle(color: isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor)),
+          child: Text('Renomear', style: TextStyle(color: isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue)),
           onPressed: () {
             if (nameController.text.isNotEmpty) {
               final updatedList = kanbanList.copyWith(name: nameController.text);

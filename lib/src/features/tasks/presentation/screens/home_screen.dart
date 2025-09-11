@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:desafio_tecnico/main.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/screens/add_task_screen.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/screens/edit_task_screen.dart';
+import 'package:desafio_tecnico/src/core/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:desafio_tecnico/src/features/news/presentation/widgets/news_card_widget.dart';
-import 'package:desafio_tecnico/src/features/kanban/presentation/screens/kanban_screen.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,12 +14,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Removed _userId as it will be fetched from authStore
-
   @override
   void initState() {
     super.initState();
-    // Inicia o fetch de ambas as listas
     if (authStore.user != null) {
       tagStore.fetchTags(authStore.user!.uid);
       taskStore.fetchTasks(authStore.user!.uid);
@@ -110,24 +105,14 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddTaskScreen(),
-                ),
-              );
+              Navigator.pushNamed(context, AppRouter.addTask);
             },
           ),
           IconButton(
-            icon: const Icon(Icons.view_kanban), // Or Icons.dashboard, Icons.grid_view
+            icon: const Icon(Icons.view_kanban),
             tooltip: 'Visualizar Kanban',
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const KanbanScreen(),
-                ),
-              );
+              Navigator.pushNamed(context, AppRouter.kanban);
             },
           ),
           PopupMenuButton<String>(
@@ -259,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text(
                                 task.description,
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onPrimary.withAlpha(204),
+                                  color: theme.colorScheme.onPrimary.withOpacity(0.8),
                                   decoration: task.isCompleted
                                       ? TextDecoration.lineThrough
                                       : null,
@@ -274,13 +259,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Icon(
                                       Icons.calendar_today,
                                       size: 14,
-                                      color: theme.colorScheme.onPrimary.withAlpha(204),
+                                      color: theme.colorScheme.onPrimary.withOpacity(0.8),
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Vence em: ${DateFormat('dd/MM/yyyy').format(task.endDate!.toDate())}',
                                       style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onPrimary.withAlpha(204),
+                                        color: theme.colorScheme.onPrimary.withOpacity(0.8),
                                       ),
                                     ),
                                   ],
@@ -309,11 +294,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               icon: const Icon(Icons.edit),
                               color: theme.colorScheme.onPrimary,
                               onPressed: () {
-                                Navigator.push(
+                                Navigator.pushNamed(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditTaskScreen(task: task),
-                                  ),
+                                  AppRouter.editTask,
+                                  arguments: task,
                                 );
                               },
                             ),

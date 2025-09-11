@@ -1,11 +1,8 @@
 import 'package:desafio_tecnico/main.dart';
-import 'package:desafio_tecnico/src/features/auth/presentation/screens/registration_screen.dart';
-import 'package:desafio_tecnico/src/features/auth/presentation/stores/login_store.dart';
+import 'package:desafio_tecnico/src/core/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
-
-final loginStore = LoginStore(authStore);
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _errorDisposer = reaction(
-      (_) => loginStore.error,
+      (_) => authStore.error,
       (String? error) {
         if (error != null && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 48.0),
               Observer(
                 builder: (_) => TextFormField(
-                  onChanged: loginStore.setEmail,
+                  onChanged: authStore.setEmail,
                   decoration: const InputDecoration(
                     labelText: 'E-mail',
                   ),
@@ -71,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16.0),
               Observer(
                 builder: (_) => TextFormField(
-                  onChanged: loginStore.setPassword,
+                  onChanged: authStore.setPassword,
                   decoration: const InputDecoration(
                     labelText: 'Senha',
                   ),
@@ -82,8 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Observer(
                 builder: (_) {
                   return ElevatedButton(
-                    onPressed: loginStore.isLoading ? null : loginStore.login,
-                    child: loginStore.isLoading
+                    onPressed: authStore.isLoading ? null : authStore.signInWithEmailAndPassword,
+                    child: authStore.isLoading
                         ? const SizedBox(
                             height: 24,
                             width: 24,
@@ -112,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16.0),
               ElevatedButton.icon(
-                onPressed: () => loginStore.loginWithGoogle(),
+                onPressed: () => authStore.signInWithGoogle(),
                 icon: const Icon(Icons.g_mobiledata), 
                 label: const Text('Entrar com Google'),
                 style: ElevatedButton.styleFrom(
@@ -127,15 +124,12 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16.0),
               TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegistrationScreen()),
-                  );
+                  Navigator.pushNamed(context, AppRouter.registration);
                 },
                 child: Text(
                   'Não tem uma conta? Cadastre-se',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimary.withAlpha(204),
+                    color: theme.colorScheme.onPrimary.withOpacity(0.8),
                   ),
                 ),
               ),

@@ -3,7 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:desafio_tecnico/src/features/news/presentation/stores/news_store.dart';
 import 'package:desafio_tecnico/src/features/news/data/news_api_service.dart';
 import 'package:dio/dio.dart';
-import 'package:desafio_tecnico/src/features/news/presentation/screens/news_detail_screen.dart';
+import 'package:desafio_tecnico/src/core/routing/app_router.dart';
 
 final newsApiService = NewsApiService(Dio());
 final newsStore = NewsStore(newsApiService);
@@ -84,12 +84,10 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                       const Spacer(),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  NewsDetailScreen(url: article.url),
-                            ),
+                            AppRouter.newsDetail,
+                            arguments: article,
                           );
                         },
                         child: Text(

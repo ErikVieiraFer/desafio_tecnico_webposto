@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:desafio_tecnico/main.dart';
-import 'package:desafio_tecnico/src/features/tasks/presentation/screens/add_task_screen.dart';
+import 'package:desafio_tecnico/src/core/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:desafio_tecnico/src/features/kanban/data/models/kanban_list.dart';
@@ -25,7 +25,7 @@ class KanbanColumnWidget extends StatelessWidget {
           width: 300,
           height: 200,
           decoration: BoxDecoration(
-            color: (isDarkMode ? AppTheme.fontColor : AppTheme.primaryColor).withAlpha(128),
+            color: (isDarkMode ? AppTheme.backgroundBlue : AppTheme.fontWhite).withOpacity(0.5),
             borderRadius: BorderRadius.circular(8.0),
           ),
           child: Center(
@@ -34,7 +34,7 @@ class KanbanColumnWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor,
+                color: isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue,
               ),
             ),
           ),
@@ -44,9 +44,9 @@ class KanbanColumnWidget extends StatelessWidget {
         width: 300,
         margin: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color: (isDarkMode ? AppTheme.fontColor : AppTheme.primaryColor).withAlpha(128),
+          color: (isDarkMode ? AppTheme.backgroundBlue : AppTheme.fontWhite).withOpacity(0.5),
           borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor, width: 2.0),
+          border: Border.all(color: isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue, width: 2.0),
         ),
         child: Center(
           child: Text(
@@ -54,7 +54,7 @@ class KanbanColumnWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor,
+              color: isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue,
             ),
           ),
         ),
@@ -74,12 +74,12 @@ class KanbanColumnWidget extends StatelessWidget {
             width: 300,
             margin: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              color: isDarkMode ? AppTheme.fontColor : AppTheme.primaryColor,
+              color: isDarkMode ? AppTheme.backgroundBlue : AppTheme.fontWhite,
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(
                 color: candidateData.isNotEmpty
-                    ? AppTheme.accentColor
-                    : isDarkMode ? AppTheme.primaryColor : AppTheme.fontColor,
+                    ? AppTheme.detailRed
+                    : isDarkMode ? AppTheme.fontWhite : AppTheme.backgroundBlue,
                 width: 2.0,
               ),
             ),
@@ -97,8 +97,8 @@ class KanbanColumnWidget extends StatelessWidget {
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: isDarkMode
-                                ? AppTheme.primaryColor
-                                : AppTheme.fontColor,
+                                ? AppTheme.fontWhite
+                                : AppTheme.backgroundBlue,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -106,8 +106,8 @@ class KanbanColumnWidget extends StatelessWidget {
                       PopupMenuButton<String>(
                         icon: Icon(Icons.more_vert,
                             color: isDarkMode
-                                ? AppTheme.primaryColor
-                                : AppTheme.fontColor),
+                                ? AppTheme.fontWhite
+                                : AppTheme.backgroundBlue),
                         onSelected: (value) {
                           if (value == 'rename') {
                             showDialog(
@@ -208,18 +208,17 @@ class KanbanColumnWidget extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushNamed(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => AddTaskScreen(kanbanListId: kanbanList.id),
-                        ),
+                        AppRouter.addTask,
+                        arguments: kanbanList.id,
                       );
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Adicionar Tarefa'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.accentColor,
-                      foregroundColor: AppTheme.primaryColor,
+                      backgroundColor: AppTheme.detailRed,
+                      foregroundColor: AppTheme.fontWhite,
                     ),
                   ),
                 ),

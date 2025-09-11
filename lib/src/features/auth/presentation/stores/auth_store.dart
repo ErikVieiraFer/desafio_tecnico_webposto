@@ -14,7 +14,6 @@ abstract class _AuthStoreBase with Store {
 
   _AuthStoreBase(this._authRepository) {
     _userSubscription = _authRepository.authStateChanges.listen((user) {
-      print('Auth state changed! User: ${user?.uid}');
       runInAction(() {
         this.user = user;
         isLoading = false;
@@ -26,40 +25,75 @@ abstract class _AuthStoreBase with Store {
   User? user;
 
   @observable
+  String email = '';
+
+  @observable
+  String password = '';
+
+  @observable
+  String confirmPassword = '';
+
+  @observable
+  String name = '';
+
+  @observable
   bool isLoading = false;
 
   @observable
   String? error;
 
   @action
-  Future<void> signIn(String email, String password) async {
+  void setEmail(String value) => email = value.trim();
+
+  @action
+  void setPassword(String value) => password = value.trim();
+
+  @action
+  void setConfirmPassword(String value) => confirmPassword = value.trim();
+
+  @action
+  void setName(String value) => name = value.trim();
+
+  @computed
+  bool get isLoginFormValid => email.isNotEmpty && password.isNotEmpty;
+
+  @computed
+  bool get isRegistrationFormValid =>
+      email.isNotEmpty && password.isNotEmpty && confirmPassword.isNotEmpty && password == confirmPassword && name.isNotEmpty;
+
+  @action
+  Future<void> signInWithEmailAndPassword() async {
+    if (!isLoginFormValid) return;
     isLoading = true;
     error = null;
     try {
       await _authRepository.signInWithEmailAndPassword(email: email, password: password);
     } on AuthException catch (e) {
       error = e.message;
-      throw e;
     } catch (e) {
       error = 'Erro desconhecido: ${e.toString()}';
-      throw e;
     } finally {
       isLoading = false;
     }
   }
 
   @action
-  Future<void> signUp(String email, String password) async {
+  Future<void> createUserWithEmailAndPassword() async {
+    if (!isRegistrationFormValid) {
+      error = 'Por favor, preencha todos os campos corretamente.';
+      if (password != confirmPassword) {
+        error = 'As senhas não coincidem.';
+      }
+      return;
+    }
     isLoading = true;
     error = null;
     try {
-      await _authRepository.createUserWithEmailAndPassword(email: email, password: password);
+      await _authRepository.createUserWithEmailAndPassword(email: email, password: password, name: name);
     } on AuthException catch (e) {
       error = e.message;
-      throw e;
     } catch (e) {
       error = 'Erro desconhecido: ${e.toString()}';
-      throw e;
     } finally {
       isLoading = false;
     }
@@ -67,20 +101,14 @@ abstract class _AuthStoreBase with Store {
 
   @action
   Future<void> signInWithGoogle() async {
-    // This method is not implemented in the current AuthRepository
-    // You might need to add it to AuthRepository or remove this call if not needed.
     isLoading = true;
     error = null;
     try {
-      // await _authRepository.signInWithGoogle(); // Commented out
-      error = 'Login com Google não implementado.';
-      throw AuthException('Login com Google não implementado.');
+      await _authRepository.signInWithGoogle();
     } on AuthException catch (e) {
       error = e.message;
-      throw e;
     } catch (e) {
       error = 'Erro desconhecido: ${e.toString()}';
-      throw e;
     } finally {
       isLoading = false;
     }

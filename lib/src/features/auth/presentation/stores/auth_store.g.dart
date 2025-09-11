@@ -9,6 +9,22 @@ part of 'auth_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AuthStore on _AuthStoreBase, Store {
+  Computed<bool>? _$isLoginFormValidComputed;
+
+  @override
+  bool get isLoginFormValid => (_$isLoginFormValidComputed ??= Computed<bool>(
+    () => super.isLoginFormValid,
+    name: '_AuthStoreBase.isLoginFormValid',
+  )).value;
+  Computed<bool>? _$isRegistrationFormValidComputed;
+
+  @override
+  bool get isRegistrationFormValid =>
+      (_$isRegistrationFormValidComputed ??= Computed<bool>(
+        () => super.isRegistrationFormValid,
+        name: '_AuthStoreBase.isRegistrationFormValid',
+      )).value;
+
   late final _$userAtom = Atom(name: '_AuthStoreBase.user', context: context);
 
   @override
@@ -21,6 +37,72 @@ mixin _$AuthStore on _AuthStoreBase, Store {
   set user(User? value) {
     _$userAtom.reportWrite(value, super.user, () {
       super.user = value;
+    });
+  }
+
+  late final _$emailAtom = Atom(name: '_AuthStoreBase.email', context: context);
+
+  @override
+  String get email {
+    _$emailAtom.reportRead();
+    return super.email;
+  }
+
+  @override
+  set email(String value) {
+    _$emailAtom.reportWrite(value, super.email, () {
+      super.email = value;
+    });
+  }
+
+  late final _$passwordAtom = Atom(
+    name: '_AuthStoreBase.password',
+    context: context,
+  );
+
+  @override
+  String get password {
+    _$passwordAtom.reportRead();
+    return super.password;
+  }
+
+  @override
+  set password(String value) {
+    _$passwordAtom.reportWrite(value, super.password, () {
+      super.password = value;
+    });
+  }
+
+  late final _$confirmPasswordAtom = Atom(
+    name: '_AuthStoreBase.confirmPassword',
+    context: context,
+  );
+
+  @override
+  String get confirmPassword {
+    _$confirmPasswordAtom.reportRead();
+    return super.confirmPassword;
+  }
+
+  @override
+  set confirmPassword(String value) {
+    _$confirmPasswordAtom.reportWrite(value, super.confirmPassword, () {
+      super.confirmPassword = value;
+    });
+  }
+
+  late final _$nameAtom = Atom(name: '_AuthStoreBase.name', context: context);
+
+  @override
+  String get name {
+    _$nameAtom.reportRead();
+    return super.name;
+  }
+
+  @override
+  set name(String value) {
+    _$nameAtom.reportWrite(value, super.name, () {
+      super.name = value;
     });
   }
 
@@ -57,24 +139,28 @@ mixin _$AuthStore on _AuthStoreBase, Store {
     });
   }
 
-  late final _$signInAsyncAction = AsyncAction(
-    '_AuthStoreBase.signIn',
+  late final _$signInWithEmailAndPasswordAsyncAction = AsyncAction(
+    '_AuthStoreBase.signInWithEmailAndPassword',
     context: context,
   );
 
   @override
-  Future<void> signIn(String email, String password) {
-    return _$signInAsyncAction.run(() => super.signIn(email, password));
+  Future<void> signInWithEmailAndPassword() {
+    return _$signInWithEmailAndPasswordAsyncAction.run(
+      () => super.signInWithEmailAndPassword(),
+    );
   }
 
-  late final _$signUpAsyncAction = AsyncAction(
-    '_AuthStoreBase.signUp',
+  late final _$createUserWithEmailAndPasswordAsyncAction = AsyncAction(
+    '_AuthStoreBase.createUserWithEmailAndPassword',
     context: context,
   );
 
   @override
-  Future<void> signUp(String email, String password) {
-    return _$signUpAsyncAction.run(() => super.signUp(email, password));
+  Future<void> createUserWithEmailAndPassword() {
+    return _$createUserWithEmailAndPasswordAsyncAction.run(
+      () => super.createUserWithEmailAndPassword(),
+    );
   }
 
   late final _$signInWithGoogleAsyncAction = AsyncAction(
@@ -103,6 +189,54 @@ mixin _$AuthStore on _AuthStoreBase, Store {
   );
 
   @override
+  void setEmail(String value) {
+    final _$actionInfo = _$_AuthStoreBaseActionController.startAction(
+      name: '_AuthStoreBase.setEmail',
+    );
+    try {
+      return super.setEmail(value);
+    } finally {
+      _$_AuthStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setPassword(String value) {
+    final _$actionInfo = _$_AuthStoreBaseActionController.startAction(
+      name: '_AuthStoreBase.setPassword',
+    );
+    try {
+      return super.setPassword(value);
+    } finally {
+      _$_AuthStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setConfirmPassword(String value) {
+    final _$actionInfo = _$_AuthStoreBaseActionController.startAction(
+      name: '_AuthStoreBase.setConfirmPassword',
+    );
+    try {
+      return super.setConfirmPassword(value);
+    } finally {
+      _$_AuthStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setName(String value) {
+    final _$actionInfo = _$_AuthStoreBaseActionController.startAction(
+      name: '_AuthStoreBase.setName',
+    );
+    try {
+      return super.setName(value);
+    } finally {
+      _$_AuthStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void dispose() {
     final _$actionInfo = _$_AuthStoreBaseActionController.startAction(
       name: '_AuthStoreBase.dispose',
@@ -118,8 +252,14 @@ mixin _$AuthStore on _AuthStoreBase, Store {
   String toString() {
     return '''
 user: ${user},
+email: ${email},
+password: ${password},
+confirmPassword: ${confirmPassword},
+name: ${name},
 isLoading: ${isLoading},
-error: ${error}
+error: ${error},
+isLoginFormValid: ${isLoginFormValid},
+isRegistrationFormValid: ${isRegistrationFormValid}
     ''';
   }
 }
