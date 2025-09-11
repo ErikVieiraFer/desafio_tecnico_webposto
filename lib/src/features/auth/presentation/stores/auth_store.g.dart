@@ -157,7 +157,7 @@ mixin _$AuthStore on _AuthStoreBase, Store {
   );
 
   @override
-  Future<void> createUserWithEmailAndPassword() {
+  Future<bool> createUserWithEmailAndPassword() {
     return _$createUserWithEmailAndPasswordAsyncAction.run(
       () => super.createUserWithEmailAndPassword(),
     );

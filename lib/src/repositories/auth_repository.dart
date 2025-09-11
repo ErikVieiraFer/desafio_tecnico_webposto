@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import './auth_exception.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -5,10 +6,15 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
+  final FirebaseFirestore _firestore;
 
-  AuthRepository({FirebaseAuth? firebaseAuth, GoogleSignIn? googleSignIn}) 
-      : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+  AuthRepository({
+    FirebaseAuth? firebaseAuth,
+    GoogleSignIn? googleSignIn,
+    FirebaseFirestore? firestore,
+  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+        _googleSignIn = googleSignIn ?? GoogleSignIn(),
+        _firestore = firestore ?? FirebaseFirestore.instance;
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
@@ -39,6 +45,18 @@ class AuthRepository {
         password: password,
       );
       await userCredential.user?.updateDisplayName(name);
+
+      if (userCredential.user != null) {
+        final uid = userCredential.user!.uid;
+        final defaultColumn = {
+          'name': 'A Fazer',
+          'order': 0,
+          'isDeletable': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'userId': uid,
+        };
+        await _firestore.collection('kanban_lists').add(defaultColumn);
+      }
     } on FirebaseAuthException catch (e) {
       throw AuthException(_mapFirebaseAuthException(e));
     }

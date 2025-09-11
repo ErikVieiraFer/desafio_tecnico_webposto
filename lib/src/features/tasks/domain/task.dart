@@ -43,8 +43,8 @@ class Task {
       position: data['position'] ?? 0,
       startDate: data['startDate'] as Timestamp?,
       endDate: data['endDate'] as Timestamp?,
-      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(), // Handle null
-      updatedAt: data['updatedAt'] as Timestamp? ?? Timestamp.now(), // Handle null
+      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
+      updatedAt: data['updatedAt'] as Timestamp? ?? Timestamp.now(),
     );
   }
 

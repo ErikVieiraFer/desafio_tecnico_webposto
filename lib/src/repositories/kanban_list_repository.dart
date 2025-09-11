@@ -27,8 +27,23 @@ class KanbanListRepository {
         .update(list.toMap());
   }
 
-  Future<void> deleteKanbanList(String listId) async {
-    await _firestore.collection(_collectionPath).doc(listId).delete();
+  Future<void> deleteKanbanList(String listId, String userId) async {
+    final batch = _firestore.batch();
+
+    final tasksQuery = await _firestore
+        .collection('tasks')
+        .where('userId', isEqualTo: userId)
+        .where('kanbanListId', isEqualTo: listId)
+        .get();
+
+    for (final doc in tasksQuery.docs) {
+      batch.update(doc.reference, {'kanbanListId': null});
+    }
+
+    final listRef = _firestore.collection(_collectionPath).doc(listId);
+    batch.delete(listRef);
+
+    await batch.commit();
   }
 
   Future<void> updateKanbanLists(List<KanbanList> lists) async {

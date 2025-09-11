@@ -45,18 +45,6 @@ mixin _$KanbanStore on _KanbanStore, Store {
     });
   }
 
-  late final _$_createDefaultKanbanListAsyncAction = AsyncAction(
-    '_KanbanStore._createDefaultKanbanList',
-    context: context,
-  );
-
-  @override
-  Future<void> _createDefaultKanbanList(String userId) {
-    return _$_createDefaultKanbanListAsyncAction.run(
-      () => super._createDefaultKanbanList(userId),
-    );
-  }
-
   late final _$addKanbanListAsyncAction = AsyncAction(
     '_KanbanStore.addKanbanList',
     context: context,

@@ -25,16 +25,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           );
         }
       }),
-      reaction((_) => authStore.user, (user) {
-        if (user != null && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cadastro realizado com sucesso!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      }),
     ];
   }
 
@@ -111,7 +101,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   return ElevatedButton(
                     onPressed: authStore.isLoading
                         ? null
-                        : authStore.createUserWithEmailAndPassword,
+                        : () async {
+                            final success = await authStore.createUserWithEmailAndPassword();
+                            if (success && mounted) {
+                              Navigator.of(context)
+                                  .pushNamedAndRemoveUntil('/home', (route) => false);
+                            }
+                          },
                     child: authStore.isLoading
                         ? const SizedBox(
                             height: 24,

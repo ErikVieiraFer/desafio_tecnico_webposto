@@ -151,17 +151,23 @@ class KanbanColumnWidget extends StatelessWidget {
                             );
                           }
                         },
-                        itemBuilder: (BuildContext context) =>
-                            <PopupMenuEntry<String>>[
-                          const PopupMenuItem<String>(
-                            value: 'rename',
-                            child: Text('Renomear'),
-                          ),
-                          const PopupMenuItem<String>(
-                            value: 'delete',
-                            child: Text('Excluir Coluna'),
-                          ),
-                        ],
+                        itemBuilder: (BuildContext context) {
+                          final items = <PopupMenuEntry<String>>[
+                            const PopupMenuItem<String>(
+                              value: 'rename',
+                              child: Text('Renomear'),
+                            ),
+                          ];
+                          if (kanbanList.isDeletable) {
+                            items.add(
+                              const PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Text('Excluir Coluna'),
+                              ),
+                            );
+                          }
+                          return items;
+                        },
                       ),
                     ],
                   ),

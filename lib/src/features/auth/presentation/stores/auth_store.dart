@@ -78,22 +78,25 @@ abstract class _AuthStoreBase with Store {
   }
 
   @action
-  Future<void> createUserWithEmailAndPassword() async {
+  Future<bool> createUserWithEmailAndPassword() async {
     if (!isRegistrationFormValid) {
       error = 'Por favor, preencha todos os campos corretamente.';
       if (password != confirmPassword) {
         error = 'As senhas não coincidem.';
       }
-      return;
+      return false;
     }
     isLoading = true;
     error = null;
     try {
       await _authRepository.createUserWithEmailAndPassword(email: email, password: password, name: name);
+      return true;
     } on AuthException catch (e) {
       error = e.message;
+      return false;
     } catch (e) {
       error = 'Erro desconhecido: ${e.toString()}';
+      return false;
     } finally {
       isLoading = false;
     }

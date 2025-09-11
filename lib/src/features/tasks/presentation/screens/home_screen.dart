@@ -116,11 +116,14 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'toggle_theme') {
                 themeStore.toggleTheme();
               } else if (value == 'logout') {
-                authStore.signOut();
+                await authStore.signOut();
+                if (!mounted) return;
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/login', (route) => false);
               }
             },
             itemBuilder: (BuildContext context) {

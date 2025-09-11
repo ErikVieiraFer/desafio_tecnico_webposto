@@ -29,7 +29,7 @@ abstract class _CommentStore with Store {
     if (userId == null) return;
 
     _commentsDisposer = reaction(
-      (_) => _authStore.user, // Re-run when user changes
+      (_) => _authStore.user,
       (_) {
         final stream = _taskRepository.getTaskCommentsStream(userId, _currentTaskId);
         stream.listen((newComments) {
@@ -48,7 +48,7 @@ abstract class _CommentStore with Store {
     if (userId == null || content.trim().isEmpty) return;
 
     final newComment = Comment(
-      id: '', // Firestore will generate it
+      id: '',
       authorId: userId,
       authorName: authorName,
       content: content,

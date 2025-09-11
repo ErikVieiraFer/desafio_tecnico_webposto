@@ -42,9 +42,6 @@ abstract class _KanbanStore with Store {
     _kanbanListsSubscription =
         _kanbanListRepository.getKanbanLists(userId).listen((lists) {
       runInAction(() {
-        if (lists.isEmpty && kanbanLists.isEmpty) {
-          _createDefaultKanbanList(userId);
-        }
         kanbanLists = ObservableList.of(lists);
         isLoading = false;
 
@@ -65,16 +62,7 @@ abstract class _KanbanStore with Store {
     return _listsLoadedCompleter!.future;
   }
 
-  @action
-  Future<void> _createDefaultKanbanList(String userId) async {
-    final defaultList = KanbanList(
-      id: '', 
-      name: 'A Fazer',
-      order: 0,
-      userId: userId,
-    );
-    await _kanbanListRepository.addKanbanList(defaultList);
-  }
+  
 
   @action
   Future<void> addKanbanList(String name) async {
@@ -99,9 +87,12 @@ abstract class _KanbanStore with Store {
 
   @action
   Future<void> deleteKanbanList(String listId) async {
+    final userId = _authRepository.currentUser?.uid;
+    if (userId == null) return;
+
     kanbanLists.removeWhere((list) => list.id == listId);
     try {
-      await _kanbanListRepository.deleteKanbanList(listId);
+      await _kanbanListRepository.deleteKanbanList(listId, userId);
     } catch (e) {
       print("Erro ao excluir coluna: $e");
     }

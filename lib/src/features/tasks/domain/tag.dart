@@ -5,7 +5,6 @@ class Tag {
 
   Tag({this.id, required this.name, required this.color});
 
-  // fromMap
   factory Tag.fromMap(Map<String, dynamic> map) {
     return Tag(
       id: map['id'] as String?,
@@ -14,7 +13,6 @@ class Tag {
     );
   }
 
-  // toMap
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -22,7 +20,6 @@ class Tag {
     };
   }
 
-  // copyWith
   Tag copyWith({String? id, String? name, int? color}) {
     return Tag(
       id: id ?? this.id,

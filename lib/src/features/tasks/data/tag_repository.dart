@@ -16,7 +16,7 @@ class TagRepository {
           final data = snapshot.data()!;
           return Tag.fromMap({
             ...data,
-            'id': snapshot.id, // Adiciona o ID do documento ao mapa
+            'id': snapshot.id,
           });
         },
         toFirestore: (tag, _) => tag.toMap(),

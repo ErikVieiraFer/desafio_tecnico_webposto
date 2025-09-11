@@ -24,7 +24,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   void initState() {
     super.initState();
-    // Ensure stores are initialized
     if (authStore.user != null) {
       tagStore.fetchTags(authStore.user!.uid);
     }
@@ -49,11 +48,9 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     if (widget.kanbanListId != null) {
       targetKanbanListId = widget.kanbanListId!;
     } else {
-      // Fetch kanban lists if they are not loaded
       if (kanbanStore.kanbanLists.isEmpty) {
         await kanbanStore.loadKanbanLists();
       }
-      // Default to the first list if available
       if (kanbanStore.kanbanLists.isNotEmpty) {
         targetKanbanListId = kanbanStore.kanbanLists.first.id;
       } else {

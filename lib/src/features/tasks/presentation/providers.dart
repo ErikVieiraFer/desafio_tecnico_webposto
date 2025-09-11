@@ -3,10 +3,8 @@ import 'package:desafio_tecnico/src/features/tasks/presentation/stores/tag_store
 import 'package:desafio_tecnico/src/features/tasks/presentation/stores/task_store.dart';
 import 'package:desafio_tecnico/src/repositories/task_repository.dart';
 
-// Repositories
 final tagRepository = TagRepository();
 final taskRepository = TaskRepository();
 
-// Stores
 final tagStore = TagStore(tagRepository);
 final taskStore = TaskStore(taskRepository, tagStore);

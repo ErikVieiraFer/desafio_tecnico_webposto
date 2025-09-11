@@ -5,26 +5,29 @@ class KanbanList {
   String name;
   int order;
   String userId;
+  final bool isDeletable;
 
   KanbanList({
     required this.id,
     required this.name,
     required this.order,
     required this.userId,
+    this.isDeletable = true,
   });
 
-  // Add copyWith method
   KanbanList copyWith({
     String? id,
     String? name,
     int? order,
     String? userId,
+    bool? isDeletable,
   }) {
     return KanbanList(
       id: id ?? this.id,
       name: name ?? this.name,
       order: order ?? this.order,
       userId: userId ?? this.userId,
+      isDeletable: isDeletable ?? this.isDeletable,
     );
   }
 
@@ -34,6 +37,7 @@ class KanbanList {
       name: map['name'] ?? '',
       order: map['order'] ?? 0,
       userId: map['userId'] ?? '',
+      isDeletable: map['isDeletable'] ?? true,
     );
   }
 
@@ -44,6 +48,7 @@ class KanbanList {
       name: data['name'] ?? '',
       order: data['order'] ?? 0,
       userId: data['userId'] ?? '',
+      isDeletable: data['isDeletable'] ?? true,
     );
   }
 
@@ -52,6 +57,7 @@ class KanbanList {
       'name': name,
       'order': order,
       'userId': userId,
+      'isDeletable': isDeletable,
     };
   }
 }
